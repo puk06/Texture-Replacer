@@ -140,8 +140,8 @@ namespace net.puk06.TextureReplacer.NDMF
                     );
 
                 // RegisterReplacedObjectに登録
-                // RegisterTextureReplace(processedTextures);
-                // RegisterMaterialReplace(processedMaterials);
+                RegisterTextureReplace(processedTextures);
+                RegisterMaterialReplace(processedMaterials);
 
                 // 変換前、変換後のマテリアルテクスチャ、生成したテクスチャの配列をまとめたものを渡してあげる。
                 return Task.FromResult<IRenderFilterNode>(new TextureReplacerNode(processedMaterials));
