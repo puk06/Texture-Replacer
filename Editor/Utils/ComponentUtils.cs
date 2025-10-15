@@ -11,7 +11,7 @@ namespace net.puk06.TextureReplacer.Utils
         /// <param name="component"></param>
         /// <returns></returns>
         internal static bool IsEnabled(PukoTextureReplacer component)
-            => component != null && component.Enabled && component.originalTexture != null && component.targetTexture != null && component.gameObject != null && component.gameObject.activeSelf;
+            => component != null && component.Enabled && component.sourceTexture != null && component.destinationTexture != null && component.gameObject != null && component.gameObject.activeSelf;
 
         /// <summary>
         /// コンポーネントが有効状態にあるかを返します。PreviewEnabledはチェックされないので注意。
@@ -21,6 +21,6 @@ namespace net.puk06.TextureReplacer.Utils
         /// <param name="computeContext"></param>
         /// <returns></returns>
         internal static bool IsEnabled(PukoTextureReplacer component, ComputeContext computeContext)
-            => component != null && component.Enabled && component.originalTexture != null && component.targetTexture != null && computeContext.ActiveInHierarchy(component.gameObject);
+            => component != null && component.Enabled && component.sourceTexture != null && component.destinationTexture != null && computeContext.ActiveInHierarchy(component.gameObject);
     }
 }

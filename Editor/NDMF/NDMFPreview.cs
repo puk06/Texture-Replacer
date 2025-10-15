@@ -30,7 +30,7 @@ namespace net.puk06.TextureReplacer.NDMF
 
                     // その中で参照されてる全てのテクスチャ (重複対策してあります)
                     var targetTextures = components
-                        .Select(c => context.Observe(c, c => c.originalTexture))
+                        .Select(c => context.Observe(c, c => c.sourceTexture))
                         .Where(t => t != null)
                         .Distinct()
                         .ToArray();
@@ -99,7 +99,7 @@ namespace net.puk06.TextureReplacer.NDMF
 
                 // 変更される予定のテクスチャ（アバター配下で使われている物だけ）
                 var targetTextures = enabledComponents
-                    .Select(c => c.originalTexture)
+                    .Select(c => c.sourceTexture)
                     .Where(t => avatarTexturesReferences.Any(r => r.Equals(NDMFUtils.GetReference(t))))
                     .Distinct()
                     .ToArray();
@@ -110,7 +110,7 @@ namespace net.puk06.TextureReplacer.NDMF
 
                 // ターゲットテクスチャごとに分ける。これは複数同じテクスチャがあった時対策
                 var groupedComponents = enabledComponents
-                    .GroupBy(c => c.originalTexture);
+                    .GroupBy(c => c.sourceTexture);
 
                 foreach (var groupedComponent in groupedComponents)
                 {
@@ -122,7 +122,7 @@ namespace net.puk06.TextureReplacer.NDMF
                         LogUtils.LogWarning($"Duplicate originalTexture detected: '{groupedComponent.Key!.name}' (using texture settings from '{firstComponent.gameObject.name}')");
                     }
 
-                    processedTextures.Add(groupedComponent.Key!, firstComponent.targetTexture!);
+                    processedTextures.Add(groupedComponent.Key!, firstComponent.destinationTexture!);
                 }
 
                 // テクスチャが含まれているマテリアルすべてを探す。

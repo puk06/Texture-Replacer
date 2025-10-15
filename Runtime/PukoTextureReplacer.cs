@@ -14,9 +14,9 @@ namespace net.puk06.TextureReplacer
         public bool PreviewEnabled = true;
 
         [Header("置き換え元のテクスチャ")]
-        public Texture2D? originalTexture = null;
+        public Texture2D? sourceTexture = null;
 
         [Header("置き換え後のテクスチャ")]
-        public Texture2D? targetTexture = null;
+        public Texture2D? destinationTexture = null;
     }
 }

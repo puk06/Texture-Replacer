@@ -30,14 +30,14 @@ namespace net.puk06.TextureReplacer.NDMF
                 if (avatarTexturesHashSet == null || !avatarTexturesHashSet.Any()) return;
 
                 var avatarComponents = enabledComponents
-                    .Where(c => avatarTexturesHashSet.Contains(c.originalTexture!));
+                    .Where(c => avatarTexturesHashSet.Contains(c.sourceTexture!));
                 if (!avatarComponents.Any()) return;
 
                 Dictionary<Texture2D, Texture2D> processedDictionary = new();
 
                 foreach (var component in avatarComponents)
                 {
-                    processedDictionary.Add(component.originalTexture!, component.targetTexture!);
+                    processedDictionary.Add(component.sourceTexture!, component.destinationTexture!);
                 }
 
                 Renderer[] renderers = avatar.GetComponentsInChildren<Renderer>();
