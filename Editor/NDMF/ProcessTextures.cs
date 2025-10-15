@@ -15,7 +15,7 @@ namespace net.puk06.TextureReplacer.NDMF
         {
             var avatar = buildContext.AvatarRootObject;
 
-            var components = avatar.GetComponentsInChildren<PukosTextureReplacer>(true);
+            var components = avatar.GetComponentsInChildren<PukoTextureReplacer>(true);
             if (components == null || !components.Any()) return;
 
             try
@@ -87,7 +87,7 @@ namespace net.puk06.TextureReplacer.NDMF
             }
         }
 
-        private void DeleteAllComponents(PukosTextureReplacer[] components)
+        private void DeleteAllComponents(PukoTextureReplacer[] components)
         {
             foreach (var component in components)
             {

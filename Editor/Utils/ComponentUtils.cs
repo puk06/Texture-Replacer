@@ -10,7 +10,7 @@ namespace net.puk06.TextureReplacer.Utils
         /// </summary>
         /// <param name="component"></param>
         /// <returns></returns>
-        internal static bool IsEnabled(PukosTextureReplacer component)
+        internal static bool IsEnabled(PukoTextureReplacer component)
             => component != null && component.Enabled && component.originalTexture != null && component.targetTexture != null && component.gameObject != null && component.gameObject.activeSelf;
 
         /// <summary>
@@ -20,7 +20,7 @@ namespace net.puk06.TextureReplacer.Utils
         /// <param name="component"></param>
         /// <param name="computeContext"></param>
         /// <returns></returns>
-        internal static bool IsEnabled(PukosTextureReplacer component, ComputeContext computeContext)
+        internal static bool IsEnabled(PukoTextureReplacer component, ComputeContext computeContext)
             => component != null && component.Enabled && component.originalTexture != null && component.targetTexture != null && computeContext.ActiveInHierarchy(component.gameObject);
     }
 }

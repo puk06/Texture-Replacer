@@ -5,7 +5,7 @@ using UnityEngine;
 namespace net.puk06.TextureReplacer
 {
     [Serializable]
-    public class PukosTextureReplacer : MonoBehaviour, VRC.SDKBase.IEditorOnly
+    public class PukoTextureReplacer : MonoBehaviour, VRC.SDKBase.IEditorOnly
     {
         [Header("スクリプトの有効 / 無効")]
         public bool Enabled = true;

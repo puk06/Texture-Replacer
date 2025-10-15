@@ -25,7 +25,7 @@ namespace net.puk06.TextureReplacer.NDMF
                 try
                 {
                     // アバター内にある全部のコンポーネント
-                    var components = context.GetComponentsInChildren<PukosTextureReplacer>(avatar, true);
+                    var components = context.GetComponentsInChildren<PukoTextureReplacer>(avatar, true);
                     if (!components.Any()) continue;
 
                     // その中で参照されてる全てのテクスチャ (重複対策してあります)
@@ -79,7 +79,7 @@ namespace net.puk06.TextureReplacer.NDMF
         {
             try
             {
-                var renderData = group.GetData<(GameObject, PukosTextureReplacer[])>();
+                var renderData = group.GetData<(GameObject, PukoTextureReplacer[])>();
                 var avatar = renderData.Item1;
                 var components = renderData.Item2;
 
