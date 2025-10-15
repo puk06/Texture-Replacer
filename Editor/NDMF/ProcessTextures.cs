@@ -46,7 +46,8 @@ namespace net.puk06.TextureReplacer.NDMF
             catch (Exception ex)
             {
                 throw new Exception($"Error occured while processing avatar: '{avatar.name}'\n{ex}");
-            } finally
+            }
+            finally
             {
                 DeleteAllComponents(components);
             }
