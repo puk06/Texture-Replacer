@@ -14,7 +14,7 @@ namespace net.puk06.TextureReplacer.NDMF
         {
             InPhase(BuildPhase.Transforming)
                 .AfterPlugin("net.rs64.tex-trans-tool")
-                .AfterPlugin("nadena.dev.modular-avatar") // å„Ç…ìÆÇ¢ÇƒÇŸÇµÇ¢Ç©ÇÁÇÀÅI
+                .AfterPlugin("nadena.dev.modular-avatar")
                 .Run(TextureReplacer.Instance)
                 .PreviewingWith(new NDMFPreview());
         }
