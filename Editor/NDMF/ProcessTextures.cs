@@ -74,7 +74,7 @@ namespace net.puk06.TextureReplacer.NDMF
 
                         MaterialUtils.ForEachTex(newMaterials[i], (texture, propName) =>
                         {
-                            if (!processedTextureDictionary.TryGetValue((Texture2D)texture, out Texture2D newTexture)) return;
+                            if (texture is not Texture2D texture2D || !processedTextureDictionary.TryGetValue(texture2D, out Texture2D newTexture)) return;
                             newMaterials[i].SetTexture(propName, newTexture);
                         });
                     }
