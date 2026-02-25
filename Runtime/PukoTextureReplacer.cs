@@ -3,7 +3,6 @@ using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace net.puk06.TextureReplacer
 {
