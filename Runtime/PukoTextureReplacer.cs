@@ -38,7 +38,7 @@ namespace net.puk06.TextureReplacer
         {
             if (ReplacementDefinitions.Count != 0) return;
             
-            if (SourceTexture != null && !ReplacementDefinitions.Any(i => i.SourceTexture == SourceTexture))
+            if (SourceTexture != null)
             {
                 ReplacementDefinitions.Add(new TextureEntry()
                 {
