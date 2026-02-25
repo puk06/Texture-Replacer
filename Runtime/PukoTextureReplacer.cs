@@ -36,16 +36,13 @@ namespace net.puk06.TextureReplacer
         void Awake() => Migrate();
         private void Migrate()
         {
-            if (ReplacementDefinitions.Count != 0) return;
+            if (ReplacementDefinitions.Count != 0 || SourceTexture == null) return;
             
-            if (SourceTexture != null)
+            ReplacementDefinitions.Add(new TextureEntry()
             {
-                ReplacementDefinitions.Add(new TextureEntry()
-                {
-                    SourceTexture = SourceTexture,
-                    DestinationTexture = DestinationTexture,
-                });
-            }
+                SourceTexture = SourceTexture,
+                DestinationTexture = DestinationTexture,
+            });
         }
     }
 
