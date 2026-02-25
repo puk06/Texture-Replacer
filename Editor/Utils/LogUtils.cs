@@ -1,7 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace net.puk06.TextureReplacer.Utils
+namespace net.puk06.TextureReplacer.Editor.Utils
 {
     internal static class LogUtils
     {

@@ -1,11 +1,14 @@
 #nullable enable
+using System.Collections.Generic;
+using System.Linq;
 using nadena.dev.ndmf;
-using net.puk06.TextureReplacer.NDMF;
+using net.puk06.TextureReplacer.Editor.Ndmf;
+using UnityEngine;
 
-[assembly: ExportsPlugin(typeof(NDMFPlugin))]
-namespace net.puk06.TextureReplacer.NDMF
+[assembly: ExportsPlugin(typeof(NdmfPlugin))]
+namespace net.puk06.TextureReplacer.Editor.Ndmf
 {
-    internal class NDMFPlugin : Plugin<NDMFPlugin>
+    internal class NdmfPlugin : Plugin<NdmfPlugin>
     {
         public override string QualifiedName => "net.puk06.texture-replacer";
         public override string DisplayName => "Puko's Texture Replacer";
@@ -15,8 +18,49 @@ namespace net.puk06.TextureReplacer.NDMF
             InPhase(BuildPhase.Transforming)
                 .AfterPlugin("net.rs64.tex-trans-tool")
                 .AfterPlugin("nadena.dev.modular-avatar")
-                .Run(TextureReplacer.Instance)
-                .PreviewingWith(new NDMFPreview());
+                .BeforePlugin("net.puk06.tex-stack-editor")
+                .BeforePlugin("net.puk06.color-changer")
+                .Run(ReplaceTextures.Instance)
+                .PreviewingWith(new RealtimePreview());
+
+            InPhase(BuildPhase.Optimizing)
+                .AfterPlugin("net.rs64.tex-trans-tool")
+                .BeforePlugin("com.anatawa12.avatar-optimizer")
+                .Run(RemoveComponents.Instance);
+        }
+    }
+
+    internal class ReplaceTextures : Pass<ReplaceTextures>
+    {
+        protected override void Execute(BuildContext context)
+        {
+            GameObject avatar = context.AvatarRootObject;
+            PukoTextureReplacer[] components = avatar.GetComponentsInChildren<PukoTextureReplacer>(false);
+
+            IEnumerable<PukoTextureReplacer> enabledComponents = components.Where(x => x.gameObject.activeInHierarchy && x.IsEnabled);
+            Dictionary<Texture2D, Texture2D?> processedTexturesDictionary = NdmfProcessor.ProcessAllComponents(enabledComponents);
+            IEnumerable<Renderer> renderers = avatar.GetComponentsInChildren<Renderer>().Where(r => r is MeshRenderer or SkinnedMeshRenderer);
+            NdmfProcessor.ReplaceTexturesInRenderers(renderers, processedTexturesDictionary);
+        }
+    }
+
+    internal class RemoveComponents : Pass<RemoveComponents>
+    {
+        protected override void Execute(BuildContext context)
+        {
+            GameObject avatar = context.AvatarRootObject;
+            PukoTextureReplacer[] components = avatar.GetComponentsInChildren<PukoTextureReplacer>(true);
+
+            RemoveAllComponents(components);
+        }
+
+        private void RemoveAllComponents(IEnumerable<Component> components)
+        {
+            foreach (Component component in components)
+            {
+                if (component == null) continue;
+                Object.DestroyImmediate(component);
+            }
         }
     }
 }

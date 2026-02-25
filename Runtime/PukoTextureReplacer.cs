@@ -1,6 +1,9 @@
 #nullable enable
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace net.puk06.TextureReplacer
 {
@@ -9,20 +12,50 @@ namespace net.puk06.TextureReplacer
     {
         [Header("スクリプトの有効 / 無効")]
         [Tooltip("スクリプト本体の有効 / 無効を切り替えます")]
-        public bool Enabled = true;
+        [FormerlySerializedAs("Enabled")]
+        public bool IsEnabled = true;
 
         [Header("プレビューの有効 / 無効")]
         [Tooltip("NDMFのリアルタイムプレビューの有効 / 無効を切り替えます")]
-        public bool PreviewEnabled = true;
+        [FormerlySerializedAs("PreviewEnabled")]
+        public bool IsPreviewEnabled = true;
 
+        [FormerlySerializedAs("sourceTexture")]
+        [HideInInspector]
+        public Texture2D? SourceTexture = null;
+
+        [FormerlySerializedAs("destinationTexture")]
+        [HideInInspector]
+        public Texture2D? DestinationTexture = null;
+        
         [Space(10)]
 
-        [Header("置き換え元のテクスチャ")]
-        [Tooltip("アバター内のこのテクスチャ全てが置き換えられます")]
-        public Texture2D? sourceTexture = null;
+        [Header("テクスチャ置き換え定義")]
+        public List<TextureEntry> ReplacementDefinitions = new();
 
-        [Header("置き換え後のテクスチャ")]
-        [Tooltip("指定したテクスチャがこのテクスチャに全て置き換えられます")]
-        public Texture2D? destinationTexture = null;
+        void Awake() => Migrate();
+        private void Migrate()
+        {
+            if (ReplacementDefinitions.Count != 0) return;
+            
+            if (SourceTexture != null && !ReplacementDefinitions.Any(i => i.SourceTexture == SourceTexture))
+            {
+                ReplacementDefinitions.Add(new TextureEntry()
+                {
+                    SourceTexture = SourceTexture,
+                    DestinationTexture = DestinationTexture,
+                });
+            }
+        }
+    }
+
+    [Serializable]
+    public class TextureEntry
+    {
+        [Header("置き換え元")]
+        public Texture2D? SourceTexture;
+
+        [Header("置き換え先")]
+        public Texture2D? DestinationTexture;
     }
 }
