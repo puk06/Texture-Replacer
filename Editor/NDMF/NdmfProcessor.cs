@@ -1,5 +1,7 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using nadena.dev.ndmf;
 using net.puk06.TextureReplacer.Editor.Extension;
@@ -26,30 +28,41 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
             return result;
         }
 
-        internal static void ReplaceTexturesInRenderers(IEnumerable<Renderer> renderers, Dictionary<Texture2D, Texture2D?> processedTexturesDictionary)
+        internal static void ReplaceTexturesInRenderers(IEnumerable<Renderer> renderers, Dictionary<Texture2D, Texture2D> processedTexturesDictionary)
         {
+            Dictionary<Material, Material> materialMap = new();
+            
             foreach (Renderer renderer in renderers)
             {
                 Material?[] materials = renderer.sharedMaterials;
-                Material?[] newMaterials = new Material[materials.Length];
 
-                for (int i = 0; i < materials.Length; i++)
+                foreach (ref Material? material in materials.AsSpan())
                 {
-                    if (materials[i] == null) continue;
-                    newMaterials[i] = GetProcessedMaterial(materials[i], processedTexturesDictionary);
+                    if (material == null) continue;
+                    if (materialMap.TryGetValue(material, out Material? cloned))
+                    {
+                        material = cloned;
+                    }
+                    else
+                    {
+                        Material newMaterial = GetProcessedMaterial(material, processedTexturesDictionary);
 
-                    ObjectRegistry.RegisterReplacedObject(materials[i], newMaterials[i]);
+                        ObjectRegistry.RegisterReplacedObject(material, newMaterial);
+                        materialMap.Add(material, newMaterial);
+                        material = newMaterial;
+                    }
                 }
 
-                renderer.sharedMaterials = newMaterials;
+                renderer.sharedMaterials = materials;
             }
         }
 
-        internal static Material? GetProcessedMaterial(Material? material, Dictionary<Texture2D, Texture2D?> processedTextures)
+        [return:NotNullIfNotNull("material")]
+        internal static Material? GetProcessedMaterial(Material? material, Dictionary<Texture2D, Texture2D> processedTextures)
         {
             if (material == null) return null;
 
-            Material newMaterial = Object.Instantiate(material);
+            Material newMaterial = UnityEngine.Object.Instantiate(material);
 
             newMaterial.ForEachTexture((texture, propName) =>
             {
