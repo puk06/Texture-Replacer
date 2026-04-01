@@ -21,6 +21,11 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
                 .BeforePlugin("net.puk06.tex-stack-editor")
                 .BeforePlugin("net.puk06.color-changer")
                 .Run(ReplaceTextures.Instance)
+#if LLC_2_4_0_OR_NEWER
+                .BeforePass("io.github.azukimochi.light-limit-changer.normalize-materials")
+#else
+                .BeforePlugin("io.github.azukimochi.light-limit-changer")
+#endif
                 .PreviewingWith(new RealtimePreview());
 
             InPhase(BuildPhase.Optimizing)
