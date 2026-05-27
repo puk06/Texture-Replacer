@@ -40,8 +40,7 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
             GameObject avatar = context.AvatarRootObject;
             PukoTextureReplacer[] components = avatar.GetComponentsInChildren<PukoTextureReplacer>(false);
 
-            IEnumerable<PukoTextureReplacer> enabledComponents = components.Where(x => x.gameObject.activeInHierarchy && x.IsEnabled);
-            Dictionary<Texture2D, Texture2D?> processedTexturesDictionary = NdmfProcessor.ProcessAllComponents(enabledComponents);
+            Dictionary<Texture2D, Texture2D> processedTexturesDictionary = NdmfProcessor.ProcessAllComponents(components);
             IEnumerable<Renderer> renderers = avatar.GetComponentsInChildren<Renderer>().Where(r => r is MeshRenderer or SkinnedMeshRenderer);
             NdmfProcessor.ReplaceTexturesInRenderers(renderers, processedTexturesDictionary);
         }
