@@ -122,7 +122,7 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
         {
             private Dictionary<Renderer, Material?[]>? _processedMaterialDictionary;
 
-            public RenderAspects WhatChanged { get; private set; } = RenderAspects.Texture & RenderAspects.Material;
+            public RenderAspects WhatChanged { get; private set; } = RenderAspects.Texture | RenderAspects.Material;
 
             public TextureReplacerNode(Dictionary<Renderer, Material?[]>? processedMaterialDictionary)
             {
