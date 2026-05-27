@@ -32,7 +32,6 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
 
                     foreach (PukoTextureReplacer component in components)
                     {
-                        context.Observe(component);
                         context.Observe(component, c => new List<TextureEntry>(c.ReplacementDefinitions), (a, b) => a.SequenceEqual(b));
                         foreach (TextureEntry entry in component.ReplacementDefinitions)
                         {
@@ -55,7 +54,7 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
 
                     if (targetRenderers.Count > 0)
                     {
-                        targetRenderGroups.Add(RenderGroup.For(targetRenderers).WithData(components));
+                        targetRenderGroups.Add(RenderGroup.For(targetRenderers).WithData(avatarGameObject));
                     }
                 }
                 catch (Exception ex)
@@ -69,17 +68,18 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
 
         public Task<IRenderFilterNode> Instantiate(RenderGroup group, IEnumerable<(Renderer, Renderer)> proxyPairs, ComputeContext context)
         {
-            Dictionary<Texture2D, Texture2D?>? replacedTexturesDictionary = null;
+            Dictionary<Texture2D, Texture2D>? replacedTexturesDictionary = null;
             Dictionary<Renderer, Material?[]>? processedMaterialDictionary = new();
 
             try
             {
-                PukoTextureReplacer[] components = group.GetData<PukoTextureReplacer[]>();
+                GameObject root = group.GetData<GameObject>();
+
+                PukoTextureReplacer[] components = root.GetComponentsInChildren<PukoTextureReplacer>(true);
 
                 foreach (PukoTextureReplacer component in components)
                 {
                     context.Observe(component);
-
                     component.ReplacementDefinitions.ForEach(i =>
                     {
                         if (i.SourceTexture != null && i.DestinationTexture != null)
@@ -89,8 +89,7 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
                     });
                 }
 
-                IEnumerable<PukoTextureReplacer> enabledParentComponents = components.Where(i => context.ActiveInHierarchy(i.gameObject) && i.IsEnabled && i.IsPreviewEnabled);
-                replacedTexturesDictionary = NdmfProcessor.ProcessAllComponents(enabledParentComponents);
+                replacedTexturesDictionary = NdmfProcessor.ProcessAllComponents(components, isPreview: true);
                 ObjectReferenceService.RegisterReplacements(replacedTexturesDictionary);
 
                 foreach ((Renderer original, Renderer proxy) in proxyPairs)
@@ -115,7 +114,7 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
                     processedMaterialDictionary.Clear();
                     processedMaterialDictionary = null;
                 }
-                return Task.FromResult<IRenderFilterNode>(new TextureReplacerNode(null));
+                return Task.FromResult<IRenderFilterNode>(new EmptyNode());
             }
         }
 
@@ -155,6 +154,16 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
                     _processedMaterialDictionary.Clear();
                     _processedMaterialDictionary = null;
                 }
+            }
+        }
+
+        private class EmptyNode : IRenderFilterNode
+        {
+            public RenderAspects WhatChanged { get; private set; } = RenderAspects.Texture | RenderAspects.Material;
+
+            public void OnFrame(Renderer original, Renderer proxy)
+            {
+                // Do nothing
             }
         }
     }

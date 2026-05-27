@@ -11,11 +11,11 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
 {
     internal class NdmfProcessor
     {
-        internal static Dictionary<Texture2D, Texture2D?> ProcessAllComponents(IEnumerable<PukoTextureReplacer> components)
+        internal static Dictionary<Texture2D, Texture2D> ProcessAllComponents(IEnumerable<PukoTextureReplacer> components, bool isPreview = false)
         {
-            Dictionary<Texture2D, Texture2D?> result = new();
+            Dictionary<Texture2D, Texture2D> result = new();
 
-            foreach (TextureEntry textureEntry in components.SelectMany(i => i.ReplacementDefinitions))
+            foreach (TextureEntry textureEntry in components.Where(i => i.IsActiveTRComponent(isPreview)).SelectMany(i => i.ReplacementDefinitions))
             {
                 if (textureEntry.SourceTexture == null || result.ContainsKey(textureEntry.SourceTexture)) continue;
                 if (textureEntry.DestinationTexture == null || result.ContainsKey(textureEntry.DestinationTexture)) continue;

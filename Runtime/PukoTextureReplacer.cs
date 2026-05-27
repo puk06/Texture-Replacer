@@ -46,12 +46,23 @@ namespace net.puk06.TextureReplacer
     }
 
     [Serializable]
-    public class TextureEntry
+    public class TextureEntry : IEquatable<TextureEntry>
     {
         [Header("置き換え元")]
         public Texture2D? SourceTexture;
 
         [Header("置き換え先")]
         public Texture2D? DestinationTexture;
+
+        public bool Equals(TextureEntry? other)
+        {
+            if (other == null) return false;
+            return SourceTexture == other.SourceTexture && DestinationTexture == other.DestinationTexture;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(SourceTexture, DestinationTexture);
+        }
     }
 }
