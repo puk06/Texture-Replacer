@@ -159,7 +159,7 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
 
         private class EmptyNode : IRenderFilterNode
         {
-            public RenderAspects WhatChanged { get; private set; } = RenderAspects.Texture | RenderAspects.Material;
+            public RenderAspects WhatChanged { get; private set; } = 0;
 
             public void OnFrame(Renderer original, Renderer proxy)
             {
