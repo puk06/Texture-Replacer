@@ -43,8 +43,7 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
                     List<Renderer> targetRenderers = new();
                     foreach (Renderer avatarRenderer in context.GetComponentsInChildren<Renderer>(avatarGameObject, true).Where(r => r is MeshRenderer or SkinnedMeshRenderer))
                     {
-                        context.Observe(avatarRenderer);
-                        Material[] materials = avatarRenderer.sharedMaterials;
+                        Material[] materials = context.Observe(avatarRenderer, i => i.sharedMaterials, (a, b) => a != null && b != null && a.SequenceEqual(b));
                         if (materials == null) continue;
 
                         if (materials.Any(material => targetTextures.Any(targetTexture => targetTexture != null && material.HasTexture(targetTexture))))
