@@ -70,6 +70,7 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
         {
             Dictionary<Texture2D, Texture2D>? replacedTexturesDictionary = null;
             Dictionary<Renderer, Material?[]>? processedMaterialDictionary = new();
+            Dictionary<Material, Material>? materialMap = null;
 
             try
             {
@@ -92,25 +93,51 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
                 replacedTexturesDictionary = NdmfProcessor.ProcessAllComponents(components, isPreview: true);
                 ObjectReferenceService.RegisterReplacements(replacedTexturesDictionary);
 
+                materialMap = new();
+
                 foreach ((Renderer original, Renderer proxy) in proxyPairs)
                 {
-                    processedMaterialDictionary[original] = proxy.sharedMaterials.Select(mat => {
-                        Material? newMaterial = NdmfProcessor.GetProcessedMaterial(mat, replacedTexturesDictionary);
-                        if (mat != null && newMaterial != null) ObjectRegistry.RegisterReplacedObject(mat, newMaterial);
-                        return newMaterial;
-                    }).ToArray();
+                    Material?[] materials = proxy.sharedMaterials;
+                    Material?[] newMaterials = (Material?[])materials.Clone();
+                    bool changed = false;
+
+                    for (int i = 0; i < materials.Length; i++)
+                    {
+                        if (materials[i] == null) continue;
+
+                        if (materialMap.TryGetValue(materials[i], out Material? cached))
+                        {
+                            newMaterials[i] = cached;
+                            changed = true;
+                        }
+                        else
+                        {
+                            Material? processed = NdmfProcessor.GetProcessedMaterial(materials[i], replacedTexturesDictionary);
+                            if (processed != materials[i])
+                            {
+                                materialMap.Add(materials[i], processed!);
+                                newMaterials[i] = processed;
+                                changed = true;
+                            }
+                        }
+                    }
+
+                    if (changed)
+                        processedMaterialDictionary[original] = newMaterials;
                 }
 
-                return Task.FromResult<IRenderFilterNode>(new TextureReplacerNode(processedMaterialDictionary));
+                return Task.FromResult<IRenderFilterNode>(new TextureReplacerNode(processedMaterialDictionary, materialMap.Values));
             }
             catch (Exception ex)
             {
                 Debug.LogError($"Failed to instantiate.\n{ex}");
                 if (processedMaterialDictionary != null)
                 {
-                    foreach (Material?[] materials in processedMaterialDictionary.Values)
-                        foreach (Material? material in materials)
-                            if (material != null) Object.DestroyImmediate(material);
+                    if (materialMap != null)
+                    {
+                        foreach (Material material in materialMap.Values)
+                            Object.DestroyImmediate(material);
+                    }
                     processedMaterialDictionary.Clear();
                     processedMaterialDictionary = null;
                 }
@@ -121,12 +148,14 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
         private class TextureReplacerNode : IRenderFilterNode, IDisposable
         {
             private Dictionary<Renderer, Material?[]>? _processedMaterialDictionary;
+            private IEnumerable<Material>? _createdMaterials;
 
             public RenderAspects WhatChanged { get; private set; } = RenderAspects.Texture | RenderAspects.Material;
 
-            public TextureReplacerNode(Dictionary<Renderer, Material?[]>? processedMaterialDictionary)
+            public TextureReplacerNode(Dictionary<Renderer, Material?[]>? processedMaterialDictionary, IEnumerable<Material>? createdMaterials)
             {
                 _processedMaterialDictionary = processedMaterialDictionary;
+                _createdMaterials = createdMaterials;
             }
 
             public void OnFrame(Renderer original, Renderer proxy)
@@ -146,11 +175,15 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
 
             public void Dispose()
             {
+                if (_createdMaterials != null)
+                {
+                    foreach (Material material in _createdMaterials)
+                        Object.DestroyImmediate(material);
+                    _createdMaterials = null;
+                }
+
                 if (_processedMaterialDictionary != null)
                 {
-                    foreach (Material?[] materials in _processedMaterialDictionary.Values)
-                        foreach (Material? material in materials)
-                            if (material != null) Object.DestroyImmediate(material);
                     _processedMaterialDictionary.Clear();
                     _processedMaterialDictionary = null;
                 }

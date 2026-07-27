@@ -13,9 +13,9 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
     {
         internal static Dictionary<Texture2D, Texture2D> ProcessAllComponents(IEnumerable<PukoTextureReplacer> components, bool isPreview = false)
         {
-            Dictionary<Texture2D, Texture2D> result = new();
+            var result = new Dictionary<Texture2D, Texture2D>();
 
-            foreach (TextureEntry textureEntry in components.Where(i => i.IsActiveTRComponent(isPreview)).SelectMany(i => i.ReplacementDefinitions))
+            foreach (var textureEntry in components.Where(i => i.IsActiveTRComponent(isPreview)).SelectMany(i => i.ReplacementDefinitions))
             {
                 if (textureEntry.SourceTexture == null || result.ContainsKey(textureEntry.SourceTexture)) continue;
                 if (textureEntry.DestinationTexture == null || result.ContainsKey(textureEntry.DestinationTexture)) continue;
@@ -30,30 +30,36 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
 
         internal static void ReplaceTexturesInRenderers(IEnumerable<Renderer> renderers, Dictionary<Texture2D, Texture2D> processedTexturesDictionary)
         {
-            Dictionary<Material, Material> materialMap = new();
+            if (processedTexturesDictionary.Count == 0) return;
+
+            var materialMap = new Dictionary<Material, Material>();
             
             foreach (Renderer renderer in renderers)
             {
                 Material?[] materials = renderer.sharedMaterials;
+                bool changed = false;
 
-                foreach (ref Material? material in materials.AsSpan())
+                foreach (ref var material in materials.AsSpan())
                 {
                     if (material == null) continue;
                     if (materialMap.TryGetValue(material, out Material? cloned))
                     {
                         material = cloned;
+                        changed = true;
                     }
                     else
                     {
-                        Material newMaterial = GetProcessedMaterial(material, processedTexturesDictionary);
+                        var newMaterial = GetProcessedMaterial(material, processedTexturesDictionary);
+                        if (newMaterial == material) continue;
 
-                        ObjectRegistry.RegisterReplacedObject(material, newMaterial);
-                        materialMap.Add(material, newMaterial);
+                        ObjectRegistry.RegisterReplacedObject(material, newMaterial!);
+                        materialMap.Add(material, newMaterial!);
                         material = newMaterial;
+                        changed = true;
                     }
                 }
 
-                renderer.sharedMaterials = materials;
+                if (changed) renderer.sharedMaterials = materials;
             }
         }
 
@@ -62,15 +68,17 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
         {
             if (material == null) return null;
 
-            Material newMaterial = UnityEngine.Object.Instantiate(material);
+            Material? newMaterial = null;
 
-            newMaterial.ForEachTexture((texture, propName) =>
+            material.ForEachTexture((texture, propName) =>
             {
                 if (texture is not Texture2D originalTexture || !processedTextures.TryGetValue(originalTexture, out Texture2D? processedTexture)) return;
+                if (newMaterial == null) newMaterial = UnityEngine.Object.Instantiate(material);
                 newMaterial.SetTexture(propName, processedTexture);
             });
 
-            return newMaterial;
+            if (newMaterial != null) return newMaterial;
+            return material;
         }
     }
 }
