@@ -4,10 +4,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
-using nadena.dev.ndmf;
 using nadena.dev.ndmf.preview;
 using net.puk06.TextureReplacer.Editor.Extension;
-using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -17,33 +15,33 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
     {
         public ImmutableList<RenderGroup> GetTargetGroups(ComputeContext context)
         {
-            IEnumerable<GameObject> avatarGameObjects = context.GetAvatarRoots().Distinct();
+            var avatarGameObjects = context.GetAvatarRoots().Distinct();
 
-            List<RenderGroup> targetRenderGroups = new();
+            var targetRenderGroups = new List<RenderGroup>();
 
-            foreach (GameObject avatarGameObject in avatarGameObjects)
+            foreach (var avatarGameObject in avatarGameObjects)
             {
                 try
                 {
-                    PukoTextureReplacer[] components = context.GetComponentsInChildren<PukoTextureReplacer>(avatarGameObject, true);
+                    var components = context.GetComponentsInChildren<PukoTextureReplacer>(avatarGameObject, true);
                     if (components.Length == 0) continue;
 
-                    List<Texture2D> targetTextures = new();
+                    var targetTextures = new List<Texture2D>();
 
-                    foreach (PukoTextureReplacer component in components)
+                    foreach (var component in components)
                     {
                         context.Observe(component, c => new List<TextureEntry>(c.ReplacementDefinitions), (a, b) => a.SequenceEqual(b));
-                        foreach (TextureEntry entry in component.ReplacementDefinitions)
+                        foreach (var entry in component.ReplacementDefinitions)
                         {
                             if (entry.SourceTexture == null || targetTextures.Contains(entry.SourceTexture)) continue;
                             targetTextures.Add(entry.SourceTexture);
                         }
                     }
 
-                    List<Renderer> targetRenderers = new();
-                    foreach (Renderer avatarRenderer in context.GetComponentsInChildren<Renderer>(avatarGameObject, true).Where(r => r is MeshRenderer or SkinnedMeshRenderer))
+                    var targetRenderers = new List<Renderer>();
+                    foreach (var avatarRenderer in context.GetComponentsInChildren<Renderer>(avatarGameObject, true).Where(r => r is MeshRenderer or SkinnedMeshRenderer))
                     {
-                        Material[] materials = context.Observe(avatarRenderer, i => i.sharedMaterials, (a, b) => a != null && b != null && a.SequenceEqual(b));
+                        var materials = context.Observe(avatarRenderer, i => i.sharedMaterials, (a, b) => a != null && b != null && a.SequenceEqual(b));
                         if (materials == null) continue;
 
                         if (materials.Any(material => targetTextures.Any(targetTexture => targetTexture != null && material.HasTexture(targetTexture))))
@@ -74,11 +72,11 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
 
             try
             {
-                GameObject root = group.GetData<GameObject>();
+                var root = group.GetData<GameObject>();
 
-                PukoTextureReplacer[] components = root.GetComponentsInChildren<PukoTextureReplacer>(true);
+                var components = root.GetComponentsInChildren<PukoTextureReplacer>(true);
 
-                foreach (PukoTextureReplacer component in components)
+                foreach (var component in components)
                 {
                     context.Observe(component);
                     component.ReplacementDefinitions.ForEach(i =>
@@ -103,19 +101,20 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
 
                     for (int i = 0; i < materials.Length; i++)
                     {
-                        if (materials[i] == null) continue;
+                        var material = materials[i];
+                        if (material == null) continue;
 
-                        if (materialMap.TryGetValue(materials[i], out Material? cached))
+                        if (materialMap.TryGetValue(material, out Material? cached))
                         {
                             newMaterials[i] = cached;
                             changed = true;
                         }
                         else
                         {
-                            Material? processed = NdmfProcessor.GetProcessedMaterial(materials[i], replacedTexturesDictionary);
-                            if (processed != materials[i])
+                            var processed = NdmfProcessor.GetProcessedMaterial(material, replacedTexturesDictionary);
+                            if (processed != material)
                             {
-                                materialMap.Add(materials[i], processed!);
+                                materialMap.Add(material, processed!);
                                 newMaterials[i] = processed;
                                 changed = true;
                             }
@@ -135,7 +134,7 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
                 {
                     if (materialMap != null)
                     {
-                        foreach (Material material in materialMap.Values)
+                        foreach (var material in materialMap.Values)
                             Object.DestroyImmediate(material);
                     }
                     processedMaterialDictionary.Clear();
@@ -177,7 +176,7 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
             {
                 if (_createdMaterials != null)
                 {
-                    foreach (Material material in _createdMaterials)
+                    foreach (var material in _createdMaterials)
                         Object.DestroyImmediate(material);
                     _createdMaterials = null;
                 }

@@ -34,7 +34,7 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
 
             var materialMap = new Dictionary<Material, Material>();
             
-            foreach (Renderer renderer in renderers)
+            foreach (var renderer in renderers)
             {
                 Material?[] materials = renderer.sharedMaterials;
                 bool changed = false;

@@ -37,11 +37,11 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
     {
         protected override void Execute(BuildContext context)
         {
-            GameObject avatar = context.AvatarRootObject;
-            PukoTextureReplacer[] components = avatar.GetComponentsInChildren<PukoTextureReplacer>(false);
+            var avatar = context.AvatarRootObject;
+            var components = avatar.GetComponentsInChildren<PukoTextureReplacer>(false);
 
-            Dictionary<Texture2D, Texture2D> processedTexturesDictionary = NdmfProcessor.ProcessAllComponents(components);
-            IEnumerable<Renderer> renderers = avatar.GetComponentsInChildren<Renderer>(true).Where(r => r is MeshRenderer or SkinnedMeshRenderer);
+            var processedTexturesDictionary = NdmfProcessor.ProcessAllComponents(components);
+            var renderers = avatar.GetComponentsInChildren<Renderer>(true).Where(r => r is MeshRenderer or SkinnedMeshRenderer);
             NdmfProcessor.ReplaceTexturesInRenderers(renderers, processedTexturesDictionary);
         }
     }
@@ -50,15 +50,15 @@ namespace net.puk06.TextureReplacer.Editor.Ndmf
     {
         protected override void Execute(BuildContext context)
         {
-            GameObject avatar = context.AvatarRootObject;
-            PukoTextureReplacer[] components = avatar.GetComponentsInChildren<PukoTextureReplacer>(true);
+            var avatar = context.AvatarRootObject;
+            var components = avatar.GetComponentsInChildren<PukoTextureReplacer>(true);
 
             RemoveAllComponents(components);
         }
 
         private void RemoveAllComponents(IEnumerable<Component> components)
         {
-            foreach (Component component in components)
+            foreach (var component in components)
             {
                 if (component == null) continue;
                 Object.DestroyImmediate(component);
